@@ -1,0 +1,167 @@
+scalar Time
+
+type User {
+  id: Int!
+  user_name: String!
+  nickname: String!
+  password: String!
+  user_img: String
+  created_at: Time!
+  updated_at: Time
+  deleted_at: Time
+}
+
+type Tweet {
+  id: Int!
+  tweet_name: String!
+  text: String!
+  user_id: Int!
+  created_at: Time!
+  updated_at: Time
+  deleted_at: Time
+}
+
+type Follow {
+  following_id: Int!
+  followed_id: Int!
+  created_at: Time!
+  deleted_at: Time
+}
+
+type Comment {
+  comment: String!
+  tweet_id: Int!
+  user_id: Int!
+  created_at: Time!
+  updated_at: Time
+}
+
+type Favorite {
+  tweet_id: Int!
+  user_id: Int!
+  created_at: Time!
+}
+
+type Img {
+  img_url: String!
+  tweet_id: Int!
+  created_at: Time!
+  updated_at: Time
+  deleted_at: Time
+}
+
+type TweetData {
+  id: Int!
+  tweet_name: String!
+  text: String!
+  created_at: Time!
+  updated_at: Time
+  user_id: Int!
+  user_name: String!
+  nickname: String!
+  user_img: String
+  ImgCount: Int!
+  CommentCount: Int!
+  FavCount: Int!
+  isFavorite: Int!
+}
+
+type Token {
+  token: String!
+  iat: Int!
+  exp: Int!
+  user: User!
+}
+
+type UserInfo {
+  user: User!
+  tweets: [TweetData!]!
+}
+
+type Message {
+  success: Boolean!
+}
+
+type FollowCounts {
+  followings: Int!
+  followers: Int!
+}
+
+type followingInfo {
+  isFollowing: Int!
+  following: [User!]!
+  followed: [User!]!
+}
+
+type CommentInfo {
+  comment: String!
+  tweet_id: Int!
+  user_id: Int!
+  user_name: String!
+  nickname: String!
+  user_img: String
+  created_at: Time!
+}
+
+input newTweet {
+  token: String!
+  text: String!
+  imgs: [String!]!
+}
+input updateTweet {
+  token: String!
+  text: String!
+  tweet_id: Int!
+}
+input addComment {
+  token: String!
+  tweet_id: Int!
+  comment: String!
+}
+input updateFavorite {
+  tweet_id: Int!
+  token: String!
+  isFavorite: Boolean!
+}
+input updateFollow {
+  token: String!
+  followed_id: Int!
+  folowStatus: Boolean!
+}
+input updateProfile {
+  token: String!
+  user_name: String!
+  nickname: String!
+  img: String!
+}
+
+type Mutation {
+  signup(user_name: String!, password: String!): Message!
+  login(user_name: String!, password: String!): Token!
+
+  createTweet(input: newTweet!): TweetData!
+  updateTweet(input: updateTweet!): TweetData!
+  deleteTweet(tweet_id: Int!, token: String!): Message!
+  addComment(input: addComment!): Comment!
+  updateFavorite(input: updateFavorite!): Message!
+  updateProfile(input: updateProfile!): Token!
+  followUser(input: updateFollow!): Message!
+}
+
+type Query {
+  tweets(token: String, current: Int!): [TweetData!]!
+  tweetByID(tweet_id: Int!): TweetData!
+  searchText(text: String!): [TweetData!]!
+  imageByID(tweet_id: Int!): [Img!]!
+  comments(tweet_id: Int!): [CommentInfo!]!
+
+  tokenCheck(user_name: String!, token: String!): Message!
+  editCheck(token: String!, tweet_id: Int!): Message!
+  userInfo(user_name: String!): UserInfo!
+  followCount(user_id: Int!): FollowCounts!
+  followInfo(user_name: String!, token: String): followingInfo!
+}
+
+type Subscription {
+  addTweetChannel(token: String!): TweetData!
+}

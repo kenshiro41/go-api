@@ -1,0 +1,11 @@
+CREATE TABLE users
+(
+  id SERIAL NOT NULL PRIMARY KEY,
+  user_name VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  nickname VARCHAR(30) NOT NULL,
+  user_img VARCHAR(255) NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP DEFAULT NULL,
+  deleted_at TIMESTAMP DEFAULT NULL
+);

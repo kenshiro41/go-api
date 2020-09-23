@@ -1,0 +1,17 @@
+FROM golang:1.13.0-alpine
+
+RUN apk update && apk add --no-cache git make musl-dev curl
+
+ENV GOPATH /go
+ENV PATH /go/bin:$PATH
+ENV GO111MODULE=on
+
+WORKDIR /go/src/github.com/kenshiro41/go_app
+ADD . /go/src/github.com/kenshiro41/go_app
+
+RUN go get github.com/jinzhu/gorm && \
+  go get github.com/jinzhu/gorm/dialects/postgres && \
+  go get github.com/pilu/fresh
+
+RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.11.0/migrate.linux-amd64.tar.gz | tar xvz && \
+  mv ./migrate.linux-amd64 /usr/bin/migrate

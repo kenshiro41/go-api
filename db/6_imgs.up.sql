@@ -1,0 +1,11 @@
+CREATE TABLE imgs
+(
+  id SERIAL NOT NULL PRIMARY KEY,
+  img_url VARCHAR(255) NOT NULL,
+  tweet_id INTEGER NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP DEFAULT NULL,
+  deleted_at TIMESTAMP DEFAULT NULL
+);
+ALTER TABLE imgs
+ADD FOREIGN KEY (tweet_id) REFERENCES tweets (id);

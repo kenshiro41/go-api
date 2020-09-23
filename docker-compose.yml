@@ -1,0 +1,25 @@
+version: '3.3' 
+services:
+  go_app:
+    build: .
+    tty: true 
+    volumes:
+      - .:/go/src/github.com/kenshiro41/go_app
+    ports:
+      - 7890:7890
+    environment:
+    - GO111MODULE=on
+    - DATABASE_HOST=app_db
+    - DATABASE_USER=ken41
+    - DATABASE_PORT=5432
+    - DATABASE_PASSWD=ken41
+    - DATABASE_DBNAME=mydb
+  db:
+    image: postgres:latest
+    container_name: app_db
+    environment:
+      POSTGRES_USER: ken41
+      POSTGRES_PASSWORD: ken41
+      POSTGRES_DB: mydb
+    ports:
+      - 5432:5432

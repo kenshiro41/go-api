@@ -1,0 +1,6 @@
+tmp/
+scripts/
+.gitignore
+.circleci/
+main
+gqlgen.yml
