@@ -20,7 +20,7 @@ import (
 
 func UploadImage(base64image string) (*string, error) {
 	mode := os.Getenv("MODE")
-	if mode == "production" {
+	if mode != "production" {
 		err := godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
 		if err != nil {
 			return nil, err
