@@ -21,7 +21,6 @@ func UserInfo(userName string) (*models.UserInfo, error) {
 		(SELECT COUNT(id) FROM favorites WHERE favorites.tweet_id = tweets.id) AS favorite_count
 		FROM tweets
 		INNER JOIN users ON tweets.user_id = users.id
-		LEFT OUTER JOIN imgs ON imgs.tweet_id = tweets.id
 		WHERE tweets.deleted_at IS NULL
 		AND users.id = ?
 		ORDER BY tweets.created_at DESC`
