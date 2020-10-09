@@ -2,43 +2,36 @@ package user
 
 import (
 	"github.com/kenshiro41/go_app/auth"
+	sqls "github.com/kenshiro41/go_app/db/sql"
 	"github.com/kenshiro41/go_app/gql/models"
 	"github.com/kenshiro41/go_app/upload"
 )
 
-func UserInfo(userName string) (*models.UserInfo, error) {
+func UserInfo(userName string) (*models.User, error) {
 	user := &models.User{}
 
 	if err := db.Table("users").Where("user_name = ?", userName).Scan(&user).Error; err != nil {
 		return nil, err
 	}
 
-	tweetsData := []*models.TweetData{}
-	raw := `SELECT tweets.id, tweets.tweet_name, tweets.text, tweets.created_at,
-		users.id AS user_id, users.user_name, users.nickname, users.user_img,
-		(SELECT COUNT(img_url) FROM imgs WHERE imgs.tweet_id = tweets.id) AS img_count,
-		(SELECT COUNT(id) FROM comments WHERE comments.tweet_id = tweets.id) AS comment_count,
-		(SELECT COUNT(id) FROM favorites WHERE favorites.tweet_id = tweets.id) AS favorite_count
-		FROM tweets
-		INNER JOIN users ON tweets.user_id = users.id
-		WHERE tweets.deleted_at IS NULL
-		AND users.id = ?
-		ORDER BY tweets.created_at DESC`
+	return user, nil
+}
 
-	if err := db.Raw(raw, user.ID).Scan(&tweetsData).Error; err != nil {
+func TweetByUser(token string, userName string, current int) ([]*models.TweetData, error) {
+	tweetsData := []*models.TweetData{}
+
+	user := models.User{}
+	db.Table("users").Where("user_name = ?", userName).Scan(&user)
+
+	if err := db.Raw(sqls.TweetByUser, user.ID, current).Scan(&tweetsData).Error; err != nil {
 		return nil, err
 	}
 
-	userInfo := &models.UserInfo{
-		User:   user,
-		Tweets: tweetsData,
-	}
-
-	return userInfo, nil
+	return tweetsData, nil
 }
 
-func UpdateProfile(input models.UpdateProfile) (*models.Token, error) {
-	decodeUser, err := auth.DecodeUser(input.Token)
+func UpdateProfile(input models.UpdateProfile, token string) (*models.Token, error) {
+	decodeUser, err := auth.DecodeUser(token)
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +55,8 @@ func UpdateProfile(input models.UpdateProfile) (*models.Token, error) {
 		return nil, err
 	}
 
-	token, err := auth.GenToken(decodeUser.ID, input.UserName)
-	token.User = user
+	t, err := auth.GenToken(decodeUser.ID, input.UserName)
+	t.User = user
 
-	return token, nil
+	return t, nil
 }

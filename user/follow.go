@@ -13,10 +13,10 @@ import (
 
 var db = mydb.DB
 
-func Follow(input models.UpdateFollow) (*models.Message, error) {
+func Follow(input models.UpdateFollow, token string) (*models.Message, error) {
 	now := time.Now()
 
-	decodeUser, err := auth.DecodeUser(input.Token)
+	decodeUser, err := auth.DecodeUser(token)
 	if err != nil {
 		return utils.FailedMessage, err
 	}

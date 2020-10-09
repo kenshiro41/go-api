@@ -98,13 +98,7 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-type UserInfo struct {
-	User   *User        `json:"user"`
-	Tweets []*TweetData `json:"tweets"`
-}
-
 type AddComment struct {
-	Token   string `json:"token"`
 	TweetID int    `json:"tweet_id"`
 	Comment string `json:"comment"`
 }
@@ -116,32 +110,27 @@ type FollowingInfo struct {
 }
 
 type NewTweet struct {
-	Token string   `json:"token"`
-	Text  string   `json:"text"`
-	Imgs  []string `json:"imgs"`
+	Text string   `json:"text"`
+	Imgs []string `json:"imgs"`
 }
 
 type UpdateFavorite struct {
-	TweetID    int    `json:"tweet_id"`
-	Token      string `json:"token"`
-	IsFavorite bool   `json:"isFavorite"`
+	TweetID    int  `json:"tweet_id"`
+	IsFavorite bool `json:"isFavorite"`
 }
 
 type UpdateFollow struct {
-	Token       string `json:"token"`
-	FollowedID  int    `json:"followed_id"`
-	FolowStatus bool   `json:"folowStatus"`
+	FollowedID  int  `json:"followed_id"`
+	FolowStatus bool `json:"folowStatus"`
 }
 
 type UpdateProfile struct {
-	Token    string `json:"token"`
 	UserName string `json:"user_name"`
 	Nickname string `json:"nickname"`
 	Img      string `json:"img"`
 }
 
 type UpdateTweet struct {
-	Token   string `json:"token"`
 	Text    string `json:"text"`
 	TweetID int    `json:"tweet_id"`
 }

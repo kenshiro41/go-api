@@ -3,6 +3,8 @@ package tweet
 import (
 	"time"
 
+	sqls "github.com/kenshiro41/go_app/db/sql"
+
 	"github.com/kenshiro41/go_app/auth"
 	mydb "github.com/kenshiro41/go_app/db"
 	"github.com/kenshiro41/go_app/gql/models"
@@ -12,11 +14,11 @@ import (
 
 var db = mydb.DB
 
-func NewTweet(input models.NewTweet) (*models.TweetData, error) {
+func NewTweet(input models.NewTweet, token string) (*models.TweetData, error) {
 	now := time.Now()
 	tweetName := utils.RandomString()
 
-	decodeUser, err := auth.DecodeUser(input.Token)
+	decodeUser, err := auth.DecodeUser(token)
 	if err != nil {
 		return nil, err
 	}
@@ -71,10 +73,10 @@ func NewTweet(input models.NewTweet) (*models.TweetData, error) {
 	return tweetData, nil
 }
 
-func UpdateFavs(input models.UpdateFavorite) (*models.Message, error) {
+func UpdateFavs(input models.UpdateFavorite, token string) (*models.Message, error) {
 	fav := &models.Favorite{}
 
-	decodeUser, err := auth.DecodeUser(input.Token)
+	decodeUser, err := auth.DecodeUser(token)
 	if err != nil {
 		return utils.FailedMessage, nil
 	}
@@ -115,10 +117,10 @@ func RemoveTweet(tweetID int, token string) (*models.Message, error) {
 	return utils.SuccessMessage, nil
 }
 
-func UpdateTweet(input models.UpdateTweet) (*models.TweetData, error) {
+func UpdateTweet(input models.UpdateTweet, token string) (*models.TweetData, error) {
 	d := &models.TweetData{}
 
-	decodeUser, err := auth.DecodeUser(input.Token)
+	decodeUser, err := auth.DecodeUser(token)
 	if err != nil {
 		return nil, err
 	}
@@ -127,19 +129,7 @@ func UpdateTweet(input models.UpdateTweet) (*models.TweetData, error) {
 		return nil, err
 	}
 
-	raw := `SELECT tweets.id, tweets.tweet_name, tweets.text, tweets.created_at,
-		users.id AS user_id, users.user_name, users.nickname, users.user_img,
-		(SELECT COUNT(img_url) FROM imgs WHERE imgs.tweet_id = tweets.id) AS img_count,
-		(SELECT COUNT(id) FROM comments WHERE comments.tweet_id = tweets.id) AS comment_count,
-		(SELECT COUNT(id) FROM favorites WHERE favorites.tweet_id = tweets.id) AS favorite_count,
-		(SELECT CAST(COUNT(1) AS BIT) FROM favorites WHERE favorites.tweet_id = tweets.id AND favorites.user_id = ?) AS isFavorite
-		FROM tweets
-		INNER JOIN users ON tweets.user_id = users.id
-		WHERE tweets.deleted_at IS NULL
-		AND tweets.id = ? AND users.id = ?
-		LIMIT 1`
-
-	if err := db.Raw(raw, decodeUser.ID, input.TweetID, decodeUser.ID).Scan(&d).Error; err != nil {
+	if err := db.Raw(sqls.UpdateTweet, decodeUser.ID, input.TweetID, decodeUser.ID).Scan(&d).Error; err != nil {
 		return nil, err
 	}
 

@@ -8,8 +8,8 @@ import (
 
 var db = mydb.DB
 
-func AddComment(input models.AddComment) (*models.Comment, error) {
-	decodeUser, err := auth.DecodeUser(input.Token)
+func AddComment(input models.AddComment, token string) (*models.Comment, error) {
+	decodeUser, err := auth.DecodeUser(token)
 	if err != nil {
 		return nil, err
 	}
