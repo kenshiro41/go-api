@@ -23,7 +23,9 @@ func (r *mutationResolver) Login(ctx context.Context, userName string, password 
 }
 
 func (r *mutationResolver) CreateTweet(ctx context.Context, input models.NewTweet) (*models.TweetData, error) {
-	tweetData, err := tweet.NewTweet(input)
+	t := ctx.Value(models.Token{}).(string)
+
+	tweetData, err := tweet.NewTweet(input, t)
 	if err != nil {
 		return nil, err
 	}
@@ -38,39 +40,54 @@ func (r *mutationResolver) CreateTweet(ctx context.Context, input models.NewTwee
 }
 
 func (r *mutationResolver) UpdateTweet(ctx context.Context, input models.UpdateTweet) (*models.TweetData, error) {
-	return tweet.UpdateTweet(input)
+	t := ctx.Value(models.Token{}).(string)
+
+	return tweet.UpdateTweet(input, t)
 }
 
-func (r *mutationResolver) DeleteTweet(ctx context.Context, tweetID int, token string) (*models.Message, error) {
-	return tweet.RemoveTweet(tweetID, token)
+func (r *mutationResolver) DeleteTweet(ctx context.Context, tweetID int) (*models.Message, error) {
+	t := ctx.Value(models.Token{}).(string)
+
+	return tweet.RemoveTweet(tweetID, t)
 }
 
 func (r *mutationResolver) AddComment(ctx context.Context, input models.AddComment) (*models.Comment, error) {
-	return comment.AddComment(input)
+	t := ctx.Value(models.Token{}).(string)
+
+	return comment.AddComment(input, t)
 }
 
 func (r *mutationResolver) UpdateFavorite(ctx context.Context, input models.UpdateFavorite) (*models.Message, error) {
-	return tweet.UpdateFavs(input)
+	t := ctx.Value(models.Token{}).(string)
+
+	return tweet.UpdateFavs(input, t)
 }
 
 func (r *mutationResolver) UpdateProfile(ctx context.Context, input models.UpdateProfile) (*models.Token, error) {
-	return user.UpdateProfile(input)
+	t := ctx.Value(models.Token{}).(string)
+
+	return user.UpdateProfile(input, t)
 }
 
 func (r *mutationResolver) FollowUser(ctx context.Context, input models.UpdateFollow) (*models.Message, error) {
-	return user.Follow(input)
+	t := ctx.Value(models.Token{}).(string)
+
+	return user.Follow(input, t)
 }
 
-func (r *queryResolver) Tweets(ctx context.Context, token *string, current int) ([]*models.TweetData, error) {
-	return tweet.AllTweet(token, current)
+func (r *queryResolver) Tweets(ctx context.Context, current int) ([]*models.TweetData, error) {
+	t := ctx.Value(models.Token{}).(string)
+
+	return tweet.AllTweet(t, current)
 }
 
 func (r *queryResolver) TweetByID(ctx context.Context, tweetID int) (*models.TweetData, error) {
 	return tweet.TweetByID(tweetID)
 }
 
-func (r *queryResolver) SearchText(ctx context.Context, text string) ([]*models.TweetData, error) {
-	return tweet.Search(text)
+func (r *queryResolver) SearchText(ctx context.Context, text string, current int) ([]*models.TweetData, error) {
+	t := ctx.Value(models.Token{}).(string)
+	return tweet.Search(t, text, current)
 }
 
 func (r *queryResolver) ImageByID(ctx context.Context, tweetID int) ([]*models.Img, error) {
@@ -81,27 +98,37 @@ func (r *queryResolver) Comments(ctx context.Context, tweetID int) ([]*models.Co
 	return comment.Comments(tweetID)
 }
 
-func (r *queryResolver) TokenCheck(ctx context.Context, userName string, token string) (*models.Message, error) {
-	return auth.TokenCheck(userName, token)
+func (r *queryResolver) TokenCheck(ctx context.Context, userName string) (*models.Message, error) {
+	t := ctx.Value(models.Token{}).(string)
+
+	return auth.TokenCheck(userName, t)
 }
 
-func (r *queryResolver) EditCheck(ctx context.Context, token string, tweetID int) (*models.Message, error) {
-	return tweet.CheckCanEdit(token, tweetID)
+func (r *queryResolver) EditCheck(ctx context.Context, tweetID int) (*models.Message, error) {
+	t := ctx.Value(models.Token{}).(string)
+
+	return tweet.CheckCanEdit(t, tweetID)
 }
 
-func (r *queryResolver) UserInfo(ctx context.Context, userName string) (*models.UserInfo, error) {
+func (r *queryResolver) UserInfo(ctx context.Context, userName string) (*models.User, error) {
 	return user.UserInfo(userName)
+}
+
+func (r *queryResolver) TweetByUser(ctx context.Context, userName string, current int) ([]*models.TweetData, error) {
+	t := ctx.Value(models.Token{}).(string)
+	return user.TweetByUser(t, userName, current)
 }
 
 func (r *queryResolver) FollowCount(ctx context.Context, userID int) (*models.FollowCounts, error) {
 	return user.CountFollowings(userID)
 }
 
-func (r *queryResolver) FollowInfo(ctx context.Context, userName string, token *string) (*models.FollowingInfo, error) {
-	return user.FollowInfo(userName, token)
+func (r *queryResolver) FollowInfo(ctx context.Context, userName string) (*models.FollowingInfo, error) {
+	t := ctx.Value(models.Token{}).(string)
+	return user.FollowInfo(userName, &t)
 }
 
-func (r *subscriptionResolver) AddTweetChannel(ctx context.Context, token string) (<-chan *models.TweetData, error) {
+func (r *subscriptionResolver) AddTweetChannel(ctx context.Context) (<-chan *models.TweetData, error) {
 	id := utils.RandString(8)
 	events := make(chan *models.TweetData, 1)
 

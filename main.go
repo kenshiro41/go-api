@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/kenshiro41/go_app/gql/models"
+
 	"github.com/joho/godotenv"
 
 	mydb "github.com/kenshiro41/go_app/db"
@@ -24,6 +26,19 @@ import (
 const (
 	defaultPort = "7890"
 )
+
+func jwtMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token := r.Header.Get("token")
+
+			ctx := context.WithValue(r.Context(), models.Token{}, token)
+
+			r = r.WithContext(ctx)
+			next.ServeHTTP(w, r)
+		})
+	}
+}
 
 func main() {
 	mode := os.Getenv("MODE")
@@ -59,6 +74,8 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+
+	r.Use(jwtMiddleware())
 
 	// Graphql PlayGround
 	if mode != "production" {
