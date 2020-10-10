@@ -18,8 +18,14 @@ func NewTweet(input models.NewTweet, token string) (*models.TweetData, error) {
 	now := time.Now()
 	tweetName := utils.RandomString()
 
+	user := &models.User{}
+
 	decodeUser, err := auth.DecodeUser(token)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Table("users").Where("id = ?", decodeUser.ID).Scan(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -60,10 +66,10 @@ func NewTweet(input models.NewTweet, token string) (*models.TweetData, error) {
 		TweetName:    tweetName,
 		Text:         input.Text,
 		CreatedAt:    tweet.CreatedAt,
-		UserID:       decodeUser.ID,
-		UserName:     decodeUser.UserName,
-		Nickname:     decodeUser.UserName,
-		UserImg:      nil,
+		UserID:       user.ID,
+		UserName:     user.UserName,
+		Nickname:     user.Nickname,
+		UserImg:      user.UserImg,
 		ImgCount:     0,
 		CommentCount: 0,
 		FavCount:     0,
